@@ -1,0 +1,47 @@
+sudo: false
+dist: trusty
+
+language: scala
+
+scala:
+  - "2.11.12"
+  - "2.12.5"
+
+jdk: oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
+
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
+install:
+  - git fetch --tags
+
+script:
+   - sbt ++$TRAVIS_SCALA_VERSION scalastyle coverage test coverageReport scripted
+
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
+  # scalatest generates XHTML files, but fails to escape an ampersand
+  - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
+  - reports-publisher
+
+after_failure:
+  # scalatest generates XHTML files, but fails to escape an ampersand
+  - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
+  - reports-publisher
+
+notifications:
+  slack:
+    secure: tjhD55niGB/56xPCOGhYs22RmMxC2m8dctaSb1xIyqEg5COPlx2njMnZmhuVzFjn5iC8dG63CZPOKz7nKe8OvIJSKpd1ds4oKgv1HAXsTVAIfDYieBu5FjTvRg690L0is3OWkfNt3kp5EakMbRy960QxYOuAq0pRua0biDmH9Gk=
+  webhooks:
+    urls:
+    - http://devhose.spt-engprod-pro.schibsted.io/devhose/travis
+    on_success: always
+    on_failure: always
+    on_pull_requests: true
