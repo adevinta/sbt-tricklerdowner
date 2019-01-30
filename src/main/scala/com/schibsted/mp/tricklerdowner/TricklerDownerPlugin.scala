@@ -15,6 +15,8 @@ import scala.sys.process.Process
 
 object TricklerDownerPlugin extends AutoPlugin {
 
+  private type Version = String
+
   private val DependenciesFileName = "managed-dependencies.yml"
 
   private val DependenciesKey = "dependencies"
@@ -29,13 +31,15 @@ object TricklerDownerPlugin extends AutoPlugin {
       val configFile = tricklerdownerConfigFile.value
       val baseDir = baseDirectory.value
       val allDeps = firstDep +: otherDeps
-      allDeps.map { dep =>
-        loadVersion(dep, configFile, baseDir).map(dep.%) match {
-          case Left(error) =>
-            throw new RuntimeException(error.message)
-          case Right(module) => module
-        }
-      }
+      constructManagedDependencies(configFile, baseDir, allDeps)(moduleBuilder())
+    }
+    def managedDependenciesWithConfig(sbtConfig: Configuration)
+                                     (firstDep: OrganizationArtifactName,
+                                      otherDeps: OrganizationArtifactName*): Def.Initialize[Seq[ModuleID]] = Def.setting {
+      val configFile = tricklerdownerConfigFile.value
+      val baseDir = baseDirectory.value
+      val allDeps = firstDep +: otherDeps
+      constructManagedDependencies(configFile, baseDir, allDeps)(moduleBuilder(Some(sbtConfig)))
     }
   }
 
@@ -69,7 +73,7 @@ object TricklerDownerPlugin extends AutoPlugin {
   private[tricklerdowner] def loadVersion(dep: OrganizationArtifactName, configFile: File, baseDir: File): Either[Error, String] = {
     for {
       file     <- existingConfigFile(configFile)
-      filePath  = file.toString//.toPath.relativize(baseDir.toPath).toString
+      filePath  = file.toString
       reader   <- createReader(file, filePath)
       config   <- parseConfig(reader, filePath)
       version  <- extractVersion(config, dep, filePath)
@@ -179,6 +183,21 @@ object TricklerDownerPlugin extends AutoPlugin {
           case _ => UnexpectedCommandOutput(cmd, output).asLeft
         }
       }
+  }
+
+  private def constructManagedDependencies(tricklerdownerConfigFile: File, baseDir: File, deps: Seq[OrganizationArtifactName])
+                                          (moduleIdBuilder: (OrganizationArtifactName, Version) => ModuleID): Seq[ModuleID] = {
+    deps.map { dep =>
+      loadVersion(dep, tricklerdownerConfigFile, baseDir).map(moduleIdBuilder(dep, _)) match {
+        case Left(error) =>
+          throw new RuntimeException(error.message)
+        case Right(module) => module
+      }
+    }
+  }
+
+  def moduleBuilder(maybeConfig: Option[Configuration] = None)(dep: OrganizationArtifactName, version: Version): ModuleID = {
+    maybeConfig.foldLeft(dep % version) { _ % _ }
   }
 }
 
