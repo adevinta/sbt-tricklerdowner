@@ -48,11 +48,18 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
+
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
 
-    tricklerdownerDirectoryConfigFile := baseDirectory.value,
+    trickledownerConfigFromParent := false,
 
-    tricklerdownerConfigFile := tricklerdownerDirectoryConfigFile.value / DependenciesFileName,
+    tricklerdownerConfigFile := {
+      if(trickledownerConfigFromParent.value) {
+        searchConfigFileIn(baseDirectory.value) / DependenciesFileName
+      }else{
+        baseDirectory.value / DependenciesFileName
+      }
+    },
 
     tricklerdownerEndpoint := DefaultEndpoint,
 
@@ -73,6 +80,9 @@ object TricklerDownerPlugin extends AutoPlugin {
       }
     }
   )
+
+  private[tricklerdowner] def searchConfigFileIn(directory: File): File =
+    if(new File(directory, DependenciesFileName).exists()) directory else searchConfigFileIn(directory.getParentFile)
 
   private[tricklerdowner] def loadVersion(dep: OrganizationArtifactName, configFile: File, baseDir: File): Either[Error, String] = {
     for {

@@ -5,7 +5,7 @@ import java.net.UnknownHostException
 import java.nio.file.Files
 
 import scala.sys.process.Process
-import TricklerDownerPlugin.{loadVersion, submitEvent}
+import TricklerDownerPlugin.{loadVersion, submitEvent, searchConfigFileIn}
 import cats.Id
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, equalToJson, ok, post, postRequestedFor, urlEqualTo, aResponse}
@@ -136,6 +136,23 @@ class TricklerDownerPluginSpec extends FlatSpec with Matchers with Inside with D
       }
     }
   }
+
+  it should "search in parent directories for the managed dependency yml" in {
+    val tempDir = Files.createTempDirectory("test").toFile
+    val manageDepFileName = "managed-dependencies.yml"
+    createFile(tempDir, manageDepFileName, """
+                                             |dependencies:
+                                             |  org:art: 0.1.0
+                                           """.stripMargin)
+
+    val secondLevel = Files.createTempDirectory(Files.createTempDirectory(tempDir.toPath, "firstLevel")
+      .toFile
+      .toPath, "secondLevel")
+      .toFile
+    searchConfigFileIn(secondLevel) shouldBe tempDir
+  }
+
+
 }
 
 object TricklerDownerPluginSpec {
