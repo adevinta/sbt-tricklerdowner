@@ -26,6 +26,7 @@ object TricklerDownerPlugin extends AutoPlugin {
   private case class GitInfo(commit: String, repoUrl: String)
 
   object autoImport extends TricklerDownerKeys {
+
     def managedDependencies(firstDep: OrganizationArtifactName,
                             otherDeps: OrganizationArtifactName*): Def.Initialize[Seq[ModuleID]] = Def.setting {
       val configFile = tricklerdownerConfigFile.value
@@ -47,8 +48,13 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
+  override def globalSettings: Seq[Def.Setting[_]] = Seq(
+    tricklerdownerDirectoryConfigFile := baseDirectory.value
+  )
+
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    tricklerdownerConfigFile := baseDirectory.value / DependenciesFileName,
+
+    tricklerdownerConfigFile := tricklerdownerDirectoryConfigFile.value / DependenciesFileName,
 
     tricklerdownerEndpoint := DefaultEndpoint,
 
@@ -80,7 +86,7 @@ object TricklerDownerPlugin extends AutoPlugin {
     } yield version
   }
 
-  private def existingConfigFile(configFile: sbt.File) = {
+  private def existingConfigFile(configFile: sbt.File): Either[FileNotFound, sbt.File] = {
     Either.cond(
       configFile.exists,
       configFile,
