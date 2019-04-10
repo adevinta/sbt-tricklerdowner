@@ -48,11 +48,9 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
-  override def globalSettings: Seq[Def.Setting[_]] = Seq(
-    tricklerdownerDirectoryConfigFile := baseDirectory.value
-  )
-
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
+
+    tricklerdownerDirectoryConfigFile := baseDirectory.value,
 
     tricklerdownerConfigFile := tricklerdownerDirectoryConfigFile.value / DependenciesFileName,
 
