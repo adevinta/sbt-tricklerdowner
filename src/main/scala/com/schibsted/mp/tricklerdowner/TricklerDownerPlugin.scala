@@ -56,7 +56,7 @@ object TricklerDownerPlugin extends AutoPlugin {
     tricklerdownerConfigFile := {
       if(trickledownerConfigFromParent.value) {
         searchConfigFileIn(baseDirectory.value) / DependenciesFileName
-      }else{
+      } else {
         baseDirectory.value / DependenciesFileName
       }
     },
