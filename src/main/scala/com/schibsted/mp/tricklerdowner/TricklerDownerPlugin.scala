@@ -10,6 +10,7 @@ import sbt.librarymanagement.DependencyBuilders.OrganizationArtifactName
 import sbt.{AutoPlugin, Def, _}
 import scalaj.http.Http
 
+import scala.annotation.tailrec
 import scala.sys.process.Process
 
 
@@ -51,10 +52,10 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
 
-    trickledownerConfigFromParent := false,
+    trickledownerConfigFromRoot := false,
 
     tricklerdownerConfigFile := {
-      if(trickledownerConfigFromParent.value) {
+      if(trickledownerConfigFromRoot.value) {
         searchConfigFileIn(baseDirectory.value) / DependenciesFileName
       } else {
         baseDirectory.value / DependenciesFileName
@@ -81,9 +82,10 @@ object TricklerDownerPlugin extends AutoPlugin {
     }
   )
 
+  @tailrec
   private[tricklerdowner] def searchConfigFileIn(directory: File): File = {
-    if(directory == null) throw new RuntimeException(s"Could not find $DependenciesFileName in any parent directory")
-    if(new File(directory, DependenciesFileName).exists()) directory else searchConfigFileIn(directory.getParentFile)
+    if (directory == null) throw new RuntimeException(s"Could not find $DependenciesFileName in any parent directory")
+    if (new File(directory, DependenciesFileName).exists()) directory else searchConfigFileIn(directory.getParentFile)
   }
 
   private[tricklerdowner] def loadVersion(dep: OrganizationArtifactName, configFile: File, baseDir: File): Either[Error, String] = {

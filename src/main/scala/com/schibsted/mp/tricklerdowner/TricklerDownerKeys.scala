@@ -6,7 +6,7 @@ trait TricklerDownerKeys {
 
   val tricklerdownerConfigFile = settingKey[File]("File containing the config to use for the managed dependencies")
 
-  val trickledownerConfigFromParent = settingKey[Boolean]("If this is 'true' will take configuration file " +
+  val trickledownerConfigFromRoot = settingKey[Boolean]("If this is 'true' will take configuration file " +
     "from submodule directory. Otherwise it will get it from project root folder")
 
   val tricklerdownerEndpoint = settingKey[String]("Devhose endpoint for Tricklerdowner")
