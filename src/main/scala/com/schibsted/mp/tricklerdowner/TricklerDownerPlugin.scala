@@ -81,8 +81,10 @@ object TricklerDownerPlugin extends AutoPlugin {
     }
   )
 
-  private[tricklerdowner] def searchConfigFileIn(directory: File): File =
+  private[tricklerdowner] def searchConfigFileIn(directory: File): File = {
+    if(directory == null) throw new RuntimeException(s"Could not find $DependenciesFileName in any parent directory")
     if(new File(directory, DependenciesFileName).exists()) directory else searchConfigFileIn(directory.getParentFile)
+  }
 
   private[tricklerdowner] def loadVersion(dep: OrganizationArtifactName, configFile: File, baseDir: File): Either[Error, String] = {
     for {

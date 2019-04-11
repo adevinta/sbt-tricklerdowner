@@ -138,18 +138,38 @@ class TricklerDownerPluginSpec extends FlatSpec with Matchers with Inside with D
   }
 
   it should "search in parent directories for the managed dependency yml" in {
-    val tempDir = Files.createTempDirectory("test").toFile
+    val rootPath = Files.createTempDirectory("test").toFile
     val manageDepFileName = "managed-dependencies.yml"
-    createFile(tempDir, manageDepFileName, """
+    createFile(rootPath, manageDepFileName, """
                                              |dependencies:
                                              |  org:art: 0.1.0
                                            """.stripMargin)
 
-    val secondLevel = Files.createTempDirectory(Files.createTempDirectory(tempDir.toPath, "firstLevel")
-      .toFile
-      .toPath, "secondLevel")
-      .toFile
-    searchConfigFileIn(secondLevel) shouldBe tempDir
+    val firstLevel = Files.createTempDirectory(rootPath.toPath, "firstLevel").toFile
+    val secondLevel = Files.createTempDirectory(firstLevel.toPath, "secondLevel").toFile
+    searchConfigFileIn(secondLevel) shouldBe rootPath
+  }
+
+  it should "return at first directory if  managed dependency yml is present there" in {
+    val rootPath = Files.createTempDirectory("test").toFile.toPath
+    val firstLevel = Files.createTempDirectory(rootPath, "firstLevel").toFile
+    val secondLevel = Files.createTempDirectory(firstLevel.toPath, "secondLevel").toFile
+    val manageDepFileName = "managed-dependencies.yml"
+    createFile(secondLevel, manageDepFileName, """
+                                             |dependencies:
+                                             |  org:art: 0.1.0
+                                           """.stripMargin)
+
+    searchConfigFileIn(secondLevel) shouldBe secondLevel
+  }
+
+  it should "return null if managed-dependencies was not found in any parent directory" in {
+    val rootPath = Files.createTempDirectory("test").toFile.toPath
+    val firstLevel = Files.createTempDirectory(rootPath, "firstLevel").toFile
+    val secondLevel = Files.createTempDirectory(firstLevel.toPath, "secondLevel").toFile
+
+    the[RuntimeException] thrownBy searchConfigFileIn(secondLevel) should have message
+      "Could not find managed-dependencies.yml in any parent directory"
   }
 
 
