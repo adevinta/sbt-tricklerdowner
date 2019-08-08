@@ -8,8 +8,12 @@ Usually to enable a plugin in SBT, you just need to add a line to the `plugins.s
 But given that this plugin is published in our internal Artifactory repository, we also need to configure the credentials.
 
 ```scala
-resolvers += "Artifactory Realm Release Libs" at "https://artifacts.schibsted.io/artifactory/libs-release-local/"
-credentials += Credentials("Artifactory Realm", "artifacts.schibsted.io", System.getenv("ARTIFACTORY_USER"), System.getenv("ARTIFACTORY_PWD"))
+import java.net.URL
+
+val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
+
+resolvers += "Artifactory Realm Release Libs" at s"$artifactoryUrl/libs-release-local/"
+credentials += Credentials("Artifactory Realm", new URL(artifactoryUrl).getHost, System.getenv("ARTIFACTORY_USER"), System.getenv("ARTIFACTORY_PWD"))
 
 addSbtPlugin("com.schibsted.mp" % "sbt-tricklerdowner" % "0.1.0")
 ```

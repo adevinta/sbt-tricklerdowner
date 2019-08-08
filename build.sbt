@@ -1,3 +1,4 @@
+import java.net.URL
 
 inThisBuild(Seq(
   scalaVersion := "2.12.5",
@@ -14,11 +15,14 @@ lazy val defaultSettings = Defaults.coreDefaultSettings ++ Seq(
   )
 )
 
-lazy val artifactoryUrl = "https://artifacts.schibsted.io/artifactory"
+val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
 
 lazy val artifactorySettings = Seq(
   resolvers += "Artifactory Realm Libs" at s"$artifactoryUrl/libs-release-local/",
-  credentials += Credentials("Artifactory Realm", "artifacts.schibsted.io", System.getenv("ARTIFACTORY_USER"), System.getenv("ARTIFACTORY_PWD")),
+  credentials += Credentials("Artifactory Realm",
+    new URL(artifactoryUrl).getHost,
+    System.getenv("ARTIFACTORY_USER"),
+    System.getenv("ARTIFACTORY_PWD")),
   publishTo := {
     val repository = if (isSnapshot.value) "libs-snapshot-local" else "libs-release-local"
     Some("Artifactory Realm for Publish" at s"$artifactoryUrl/$repository/")

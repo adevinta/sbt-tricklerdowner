@@ -33,13 +33,3 @@ after_failure:
   # scalatest generates XHTML files, but fails to escape an ampersand
   - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
   - reports-publisher
-
-notifications:
-  slack:
-    secure: tjhD55niGB/56xPCOGhYs22RmMxC2m8dctaSb1xIyqEg5COPlx2njMnZmhuVzFjn5iC8dG63CZPOKz7nKe8OvIJSKpd1ds4oKgv1HAXsTVAIfDYieBu5FjTvRg690L0is3OWkfNt3kp5EakMbRy960QxYOuAq0pRua0biDmH9Gk=
-  webhooks:
-    urls:
-    - http://devhose.spt-engprod-pro.schibsted.io/devhose/travis
-    on_success: always
-    on_failure: always
-    on_pull_requests: true
