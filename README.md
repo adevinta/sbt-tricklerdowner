@@ -10,7 +10,7 @@ But given that this plugin is published in our internal Artifactory repository, 
 ```scala
 import java.net.URL
 
-lazy val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
+val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
 
 resolvers += "Artifactory Realm Release Libs" at s"$artifactoryUrl/libs-release-local/"
 credentials += Credentials("Artifactory Realm", new URL(artifactoryUrl).getHost, System.getenv("ARTIFACTORY_USER"), System.getenv("ARTIFACTORY_PWD"))
