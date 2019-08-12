@@ -15,7 +15,7 @@ lazy val defaultSettings = Defaults.coreDefaultSettings ++ Seq(
   )
 )
 
-val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
+lazy val artifactoryUrl = "https://artifactory.mpi-internal.com/artifactory"
 
 lazy val artifactorySettings = Seq(
   resolvers += "Artifactory Realm Libs" at s"$artifactoryUrl/libs-release-local/",
