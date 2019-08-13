@@ -31,7 +31,7 @@ deploy:
       branch: master
   - provider: script
     skip_cleanup: true
-    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish tricklerdownerPublish
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
     on:
       tags: true
 
