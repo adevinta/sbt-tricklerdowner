@@ -23,8 +23,19 @@ install:
 script:
    - sbt ++$TRAVIS_SCALA_VERSION scalastyle coverage test coverageReport scripted
 
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
+    on:
+      branch: master
+  - provider: script
+    skip_cleanup: true
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish tricklerdownerPublish
+    on:
+      tags: true
+
 after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
   # scalatest generates XHTML files, but fails to escape an ampersand
   - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
   - reports-publisher
