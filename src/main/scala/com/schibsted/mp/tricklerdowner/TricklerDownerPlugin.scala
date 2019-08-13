@@ -22,7 +22,7 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   private val DependenciesKey = "dependencies"
 
-  private val DefaultEndpoint = "https://devhose.spt-engprod-pro.schibsted.io/devhose/tricklerdowner-client"
+  private val DefaultEndpoint = "https://devhose.mpi-internal.com/devhose/tricklerdowner-client"
 
   private case class GitInfo(commit: String, repoUrl: String)
 
