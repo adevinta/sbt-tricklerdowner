@@ -28,12 +28,17 @@ deploy:
     skip_cleanup: true
     script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
     on:
-      branch: master
+      all_branches: true
+      # We deploy what we have in all branches (PRs skipped by default).
+      # The sbt-dynver will automatically publish a release or a snapshot depending on whether there's tag starting with "v".
+      condition: (-z $TRAVIS_TAG) || ($TRAVIS_TAG =~ ^v)
   - provider: script
     skip_cleanup: true
-    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish -Dpublish.repository=bintray
     on:
       tags: true
+      # We need to make sure the tag was prefixed with a `v`, which is what dynver expects to work properly.
+      condition: $TRAVIS_TAG =~ ^v
 
 after_success:
   # scalatest generates XHTML files, but fails to escape an ampersand
@@ -44,3 +49,9 @@ after_failure:
   # scalatest generates XHTML files, but fails to escape an ampersand
   - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
   - reports-publisher
+
+env:
+  global:
+    # Bintray user and pass
+    - secure: "Y3N1XaDtAwSEgewmzt5fO7CYJUetBh2AdFGUHURaerL/OnKRpTMY2Jisc6bGdFqJo/VDKGLv5vETliXPVrZbBdWIEN36WAVVGySErn9BnyL0uw8HuAPPsQ3qI7+2pfJOARS/lHcNxm+UALCTKQm6dl9toXyQHwsaAUbRvoQX51apGbAynWSyPlniu4Q2ueymIvcaPqYBGHNCbhnEzEC267MPeciqMt/L3mIuQ3CId3COVNwiLgsM36GXHpZU7wyW0PMh4vlfGTTJGMSnwDRuzL8pT39Y8Lca47uarg/koLNedk3KRScOzBg/k+DDG1qz2rkTSCHwuv0MDNdUMSTtKBmqmLW1fkQ6biDfWDgmL1M+0JLCTx2RrmY+fO62v33wfTzrVqc1kdrkua8d+U6CcdCfFkcuW8xBbjcVzhgJmHAvT1du+eVOtyBGDAJs1GWJuOU6ExhxQDtuh/ySPdJPvQeLnsrg4ufSw8bEy/5Q8gNAmB1qHfh7SLksVjbszJfZmQouHlE/h0dwjQNQAKB8gVTq1YOzpG/gzIT5bsIkZqm0GJ5D1KSMhQm90DT7JBvIOvXTGEhSRBrD0pebdv0AmRqnqyjcwsC0tVlXyaxaXjSRgx563zWbxOr4Lh0BU2vB16HbBrbtVTUB/5v+PA38MAlEB1ZJIxCgeyMjPbYTp0U="
+    - secure: "hYFCGdU75BXEMv3Kl8MickBGqRMspfKeyVugxLsQGszab+OPaDS1hFU+7pxkX6ccc4+0uxfFnv9FD25CI8RcRLxOBIylWconzXafoK4Q+wZx4OzHxcLjxAUoiLvlkvTzAfEIV5fNh4u/irzc7ZzV7LkkTqD6L+3fLdaEe7FLxSjj5YBLMU2el6UAL+0uJldc8DZScIvXScfBztlfcFss0amgwdWPSZGLGVkNPizTCYVcc/Fs/GAYtb4ykJNwWrGZevft/M5X2Dkukf6GnhFmuDzcWtI1zJZ16p11R5Ou5oHKEDn357Y+yEcJxwOYG0g9OY6Gsj9XDhMec9ocW//iuHSGaET8FfmciAY9ByrC2a2DCCWUr+2edfooRCkmjeXYBkv7poI/deOsUdYjwrOaOTp9H/fwLBex034d248i1YEatciuaIDE8Vty1VHrT7pnii5ezmACkL7x/5HXHZHyHIEB2+uZF6qAahSg6Ekw+EHjM6gNYWB33y4I9XgPsMK1bMMtfIdIJVijLbLK8l0SJ6sMK4Wvc8cKpuuJzk1DWu1Bx4v7mvpLyqOR6R2Pggnt1e7+dSVpuRTv1S+v0Ja/miHCV8BonWhsaqdf5KWpuWZ+o19WWZ6X1t5vWAuUmxpUIgIo8b90tDOrzUwxDMcWJ03R/jLfK0Ac9MmDgz9kTIY="

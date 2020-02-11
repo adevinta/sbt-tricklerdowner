@@ -1,4 +1,4 @@
-package com.schibsted.mp.tricklerdowner
+package com.adevinta.sbt.tricklerdowner
 
 sealed trait Error { def message: String }
 

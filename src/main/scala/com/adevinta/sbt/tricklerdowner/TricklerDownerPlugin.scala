@@ -1,13 +1,14 @@
-package com.schibsted.mp.tricklerdowner
+package com.adevinta.sbt.tricklerdowner
 
 import java.io.FileReader
 
 import cats.syntax.either._
 import io.circe.Json
 import io.circe.yaml.parser
+import sbt.Defaults.sbtPluginExtra
 import sbt.Keys._
 import sbt.librarymanagement.DependencyBuilders.OrganizationArtifactName
-import sbt.{AutoPlugin, Def, _}
+import sbt.{AutoPlugin, Def, ModuleID, Setting, _}
 import scalaj.http.Http
 
 import scala.annotation.tailrec
@@ -28,6 +29,12 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   object autoImport extends TricklerDownerKeys {
 
+    def managedDependency(firstDep: OrganizationArtifactName): Def.Initialize[ModuleID] = Def.setting {
+      val configFile = tricklerdownerConfigFile.value
+      val baseDir = baseDirectory.value
+      constructManagedDependencies(configFile, baseDir, Seq(firstDep))(moduleBuilder()).head
+    }
+
     def managedDependencies(firstDep: OrganizationArtifactName,
                             otherDeps: OrganizationArtifactName*): Def.Initialize[Seq[ModuleID]] = Def.setting {
       val configFile = tricklerdownerConfigFile.value
@@ -35,6 +42,7 @@ object TricklerDownerPlugin extends AutoPlugin {
       val allDeps = firstDep +: otherDeps
       constructManagedDependencies(configFile, baseDir, allDeps)(moduleBuilder())
     }
+
     def managedDependenciesWithConfig(sbtConfig: Configuration)
                                      (firstDep: OrganizationArtifactName,
                                       otherDeps: OrganizationArtifactName*): Def.Initialize[Seq[ModuleID]] = Def.setting {
@@ -42,6 +50,16 @@ object TricklerDownerPlugin extends AutoPlugin {
       val baseDir = baseDirectory.value
       val allDeps = firstDep +: otherDeps
       constructManagedDependencies(configFile, baseDir, allDeps)(moduleBuilder(Some(sbtConfig)))
+    }
+
+    def addManagedSbtPlugins(dependencies: OrganizationArtifactName*): Setting[Seq[ModuleID]] = {
+      libraryDependencies ++= {
+        val sbtV = (sbtBinaryVersion in pluginCrossBuild).value
+        val scalaV = (scalaBinaryVersion in update).value
+        managedDependencies(dependencies.head, dependencies.tail: _*).value.map { dependency =>
+          sbtPluginExtra(dependency, sbtV, scalaV)
+        }
+      }
     }
   }
 
@@ -52,10 +70,10 @@ object TricklerDownerPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
 
-    trickledownerConfigFromRoot := false,
+    trickledownerConfigFromRoot := true,
 
     tricklerdownerConfigFile := {
-      if(trickledownerConfigFromRoot.value) {
+      if (trickledownerConfigFromRoot.value) {
         searchConfigFileIn(baseDirectory.value) / DependenciesFileName
       } else {
         baseDirectory.value / DependenciesFileName

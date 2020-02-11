@@ -1,4 +1,4 @@
-package com.schibsted.mp.tricklerdowner
+package com.adevinta.sbt.tricklerdowner
 
 import java.io.{File, PrintWriter}
 import java.net.UnknownHostException

@@ -1,4 +1,4 @@
-package com.schibsted.mp.tricklerdowner
+package com.adevinta.sbt.tricklerdowner
 
 import sbt.{File, settingKey, taskKey}
 
