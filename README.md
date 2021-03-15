@@ -4,18 +4,10 @@ This SBT plugin integrates the build with TricklerDowner managed dependencies by
 
 ## Enable the SBT plugin in your projects
 
-Usually to enable a plugin in SBT, you just need to add a line to the `plugins.sbt` file under the `project` folder.
-But given that this plugin is published in our internal Artifactory repository, we also need to configure the credentials.
+To enable this plugin in SBT, you just need to add a line to the `plugins.sbt` file under the `project` folder:
 
 ```scala
-import java.net.URL
-
-val artifactoryUrl = System.getenv("ARTIFACTORY_CONTEXT")
-
-resolvers += "Artifactory Realm Release Libs" at s"$artifactoryUrl/libs-release-local/"
-credentials += Credentials("Artifactory Realm", new URL(artifactoryUrl).getHost, System.getenv("ARTIFACTORY_USER"), System.getenv("ARTIFACTORY_PWD"))
-
-addSbtPlugin("com.schibsted.mp" % "sbt-tricklerdowner" % "0.1.0")
+addSbtPlugin("com.github.adevinta.unicron" % "sbt-tricklerdowner" % "<version>")
 ```
 
 Please make sure you use the proper version.
@@ -49,11 +41,11 @@ Please, make sure you include all the dependencies that will be managed by Trick
 
 ```yaml
 dependencies:
-  com.schibsted:lib1: "1.0.0"
-  com.schibsted:lib2: "2.0.0"
+  com.github.xyz:lib1: "1.0.0"
+  com.github.xyz:lib2: "2.0.0"
 ```
 
-The dependencies key is composed by the `organisation` and the `artifact ID` separated by a colon.
+The dependencies key is composed by the `organization` and the `artifact ID` separated by a colon.
 
 To avoid problems with the yaml parsing, make sure there is an space between the key and the version value,
  and that the version value is between quotes.
@@ -65,8 +57,8 @@ you can use `managedDependencies` like:
 
 ```scala
 libraryDependencies ++= managedDependencies(
-  "com.schibsted" %% "lib1",
-  "com.schibsted" %% "lib2"
+  "com.github.xyz" %% "lib1",
+  "com.github.xyz" %% "lib2"
 ).value
 ```
 
@@ -75,8 +67,8 @@ You can also mix non managed and managed like:
 libraryDependencies ++= Seq(
   "org.scalaj" %% "scalaj-http" % "2.4.0"
 ) ++ managedDependencies(
-  "com.schibsted" %% "lib1",
-  "com.schibsted" %% "lib2"
+  "com.github.xyz" %% "lib1",
+  "com.github.xyz" %% "lib2"
 ).value
 ```
 
@@ -101,5 +93,6 @@ deploy:
 
 In the case of projects consumed by other projects, but that don't require to be updated when other projects get released,
 you still need to follow some of the previous steps, which are:
+
 - To enable the SBT plugin for TricklerDowner.
 - To publish the project details as explained before for `.travis.yml`.
