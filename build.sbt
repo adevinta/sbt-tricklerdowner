@@ -12,7 +12,7 @@ inThisBuild(Seq(
   scmInfo := Some(ScmInfo(url(s"https://github.com/adevinta/${name.value}"), s"scm:git:git@github.com:adevinta/${name.value}.git")),
 
   organizationName := "Adevinta",
-  startYear := Some(2020),
+  startYear := Some(2021),
 
   usePgpKeyHex("E362921A4CE8BD97916B06CEC6DDC7B1869C9349"),
 
@@ -24,7 +24,7 @@ inThisBuild(Seq(
 ))
 
 lazy val root = Project(id = "sbt-tricklerdowner", base = file("."))
-  .enablePlugins(SbtPlugin)
+  .enablePlugins(SbtPlugin, AutomateHeaderPlugin)
   .settings(
     sonatypeCredentialHost := "s01.oss.sonatype.org",
     publishTo := sonatypePublishToBundle.value,
