@@ -3,7 +3,7 @@ import sbt.URL
 inThisBuild(Seq(
 
   name := "sbt-tricklerdowner",
-  organization := "com.github.adevinta.unicron",
+  organization := "com.github.adevinta",
   description := "SBT plugin that integrates the build with TricklerDowner managed dependencies by Yaml",
 
   licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
