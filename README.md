@@ -7,7 +7,7 @@ This SBT plugin integrates the build with TricklerDowner managed dependencies by
 To enable this plugin in SBT, you just need to add a line to the `plugins.sbt` file under the `project` folder:
 
 ```scala
-addSbtPlugin("com.github.adevinta.unicron" % "sbt-tricklerdowner" % "<version>")
+addSbtPlugin("com.github.adevinta" % "sbt-tricklerdowner" % "<version>")
 ```
 
 Please make sure you use the proper version.
