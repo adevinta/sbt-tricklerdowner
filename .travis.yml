@@ -1,14 +1,15 @@
-sudo: false
-dist: trusty
+dist: bionic
 
 language: scala
 
-scala: "2.12.5"
+scala: 
+  - "2.12.12"
 
-jdk: oraclejdk8
+jdk: oraclejdk11
 
 cache:
   directories:
+    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
     - $HOME/.ivy2/cache
     - $HOME/.sbt
 
@@ -21,37 +22,30 @@ install:
   - git fetch --tags
 
 script:
-   - sbt ++$TRAVIS_SCALA_VERSION scalastyle coverage test coverageReport scripted
+   - sbt ++$TRAVIS_SCALA_VERSION clean headerCheck scalastyle test:scalastyle coverage test coverageReport scripted
+
+before_deploy:
+  - if [ $TRAVIS_PULL_REQUEST = 'false' ]; then
+      openssl aes-256-cbc -K $encrypted_82c15cb04022_key -iv $encrypted_82c15cb04022_iv -in secring.asc.enc -out secring.asc -d;
+      gpg --batch --import secring.asc;
+      rm secring.asc;
+    fi
 
 deploy:
   - provider: script
     skip_cleanup: true
-    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publishSigned
     on:
+      tags: false
       all_branches: true
-      # We deploy what we have in all branches (PRs skipped by default).
-      # The sbt-dynver will automatically publish a release or a snapshot depending on whether there's tag starting with "v".
-      condition: (-z $TRAVIS_TAG) || ($TRAVIS_TAG =~ ^v)
   - provider: script
     skip_cleanup: true
-    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publish -Dpublish.repository=bintray
+    script: sbt ++$TRAVIS_SCALA_VERSION coverageOff publishSigned sonatypeBundleRelease
     on:
       tags: true
-      # We need to make sure the tag was prefixed with a `v`, which is what dynver expects to work properly.
-      condition: $TRAVIS_TAG =~ ^v
-
-after_success:
-  # scalatest generates XHTML files, but fails to escape an ampersand
-  - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
-  - reports-publisher
-
-after_failure:
-  # scalatest generates XHTML files, but fails to escape an ampersand
-  - sed -e 's!bitSet & mask!bitSet \&amp; mask!' -i $(find . -path \*/build/reports/tests/\* -name index.html)
-  - reports-publisher
 
 env:
   global:
-    # Bintray user and pass
-    - secure: "Y3N1XaDtAwSEgewmzt5fO7CYJUetBh2AdFGUHURaerL/OnKRpTMY2Jisc6bGdFqJo/VDKGLv5vETliXPVrZbBdWIEN36WAVVGySErn9BnyL0uw8HuAPPsQ3qI7+2pfJOARS/lHcNxm+UALCTKQm6dl9toXyQHwsaAUbRvoQX51apGbAynWSyPlniu4Q2ueymIvcaPqYBGHNCbhnEzEC267MPeciqMt/L3mIuQ3CId3COVNwiLgsM36GXHpZU7wyW0PMh4vlfGTTJGMSnwDRuzL8pT39Y8Lca47uarg/koLNedk3KRScOzBg/k+DDG1qz2rkTSCHwuv0MDNdUMSTtKBmqmLW1fkQ6biDfWDgmL1M+0JLCTx2RrmY+fO62v33wfTzrVqc1kdrkua8d+U6CcdCfFkcuW8xBbjcVzhgJmHAvT1du+eVOtyBGDAJs1GWJuOU6ExhxQDtuh/ySPdJPvQeLnsrg4ufSw8bEy/5Q8gNAmB1qHfh7SLksVjbszJfZmQouHlE/h0dwjQNQAKB8gVTq1YOzpG/gzIT5bsIkZqm0GJ5D1KSMhQm90DT7JBvIOvXTGEhSRBrD0pebdv0AmRqnqyjcwsC0tVlXyaxaXjSRgx563zWbxOr4Lh0BU2vB16HbBrbtVTUB/5v+PA38MAlEB1ZJIxCgeyMjPbYTp0U="
-    - secure: "hYFCGdU75BXEMv3Kl8MickBGqRMspfKeyVugxLsQGszab+OPaDS1hFU+7pxkX6ccc4+0uxfFnv9FD25CI8RcRLxOBIylWconzXafoK4Q+wZx4OzHxcLjxAUoiLvlkvTzAfEIV5fNh4u/irzc7ZzV7LkkTqD6L+3fLdaEe7FLxSjj5YBLMU2el6UAL+0uJldc8DZScIvXScfBztlfcFss0amgwdWPSZGLGVkNPizTCYVcc/Fs/GAYtb4ykJNwWrGZevft/M5X2Dkukf6GnhFmuDzcWtI1zJZ16p11R5Ou5oHKEDn357Y+yEcJxwOYG0g9OY6Gsj9XDhMec9ocW//iuHSGaET8FfmciAY9ByrC2a2DCCWUr+2edfooRCkmjeXYBkv7poI/deOsUdYjwrOaOTp9H/fwLBex034d248i1YEatciuaIDE8Vty1VHrT7pnii5ezmACkL7x/5HXHZHyHIEB2+uZF6qAahSg6Ekw+EHjM6gNYWB33y4I9XgPsMK1bMMtfIdIJVijLbLK8l0SJ6sMK4Wvc8cKpuuJzk1DWu1Bx4v7mvpLyqOR6R2Pggnt1e7+dSVpuRTv1S+v0Ja/miHCV8BonWhsaqdf5KWpuWZ+o19WWZ6X1t5vWAuUmxpUIgIo8b90tDOrzUwxDMcWJ03R/jLfK0Ac9MmDgz9kTIY="
+    - secure: "Dyou8X40mNMoTLcthuYpTtsBhChI+WFj+q6biyotgXTwlo7nkRRsQLZ+R/BoVWBoG2rToAS8PWjF7ivf9G4rWuI6d4snIVjoLfv7xYZkHDkjK2QoeyCVbuhb5hyPvzG+c6TGe1AQI0r04WwMOSpYyysX2JGz5WOlgnPRPGObyNx46KgsEQk17JUjRt4siyYsfDATqvtTohgZlXlSWP/OlQ4uGB22Rm2PtaWTF3rav/cVFe6NpTATO9gJQbFrBiTDEJLnhdj3fzVcFbFQlxkG+x56SMTaTLM0TzMW8SOoUgzZQrA73DhIUJey2S4ou0UjaH9trFS15CaD0B24z0Cw7nuAn8bQ1e0FcO7xcX2RCamiRYf4i7bnvUuTwRBhGDf6Zl/R7b4yNx8oPkgOCLi2OiTZXePDihhjUOrNl2m81drkDW7SRsaOpgONiU7tObtNqhI8Rp4i6qdEbb9seu/pmmESxqDxm8WnmtbuTZd1DEXLDxpiXHmTtKWFMReLc+bsovwsP1BDzBSOmszkn9aET/A+u7dvXfix2A+eCREOajjJM7zqXEUz4dj9F7AlgpzwksI4Vxd4Y0Oddz/ggTGzMa0NC8Q1J7xH6U5HndgXwcxcjhyybIb4iXo0he9x0ZOhOtOrNYqU5fJWKjvviBNxUVSE8/egqkiPpzvI8qou8/4="
+    - secure: "gQ5T9svgcREAP4PpNHXrWDs9iAzVRtlWn8UDUKC6s7q53hDTW3qZEV7Qm+TQK3Drju2wfh1uhcIB4vzOfeoNf7e1CYsw9CArrabRpQCFCVlbZLwxeFx+5DpWTks87xAYKX3EEnAIqlbv6Qf9Ui4j1yJeNGP5990vJ1ohRQOrFtWKrQdplhBXDS/oX2GbpLhIswkp0I3IaTh1mwfupeZgSFc75aDdXtPXY8z2EuvJCS3BZ9oBXJ2gNrAIvh18bEJQHu98dzbG67UrcPgk4S9sPFkx/A6oY2eal7DrfBxWcqo9rforMaeltmz1+yIvG9rJJOlU9FLU8gYkGrnA0r0arUGAW7EvFs2PsihljgF+wxxOJqhdqbq8BdtgBSSNdEpNDQSQU/jSpdm4Ug0d9zllwcOBp9tR7ToAmfY0D9YrwJjEiMZMm9AFtaq5r7CQ7pj57TQB19b9zyhi9XiCM3y/BkAVLDIAMmtGx/qDXizeBrNU9nObejfX1jrrchlk6T2i75O25FA2tMqfi/Ydyj169ehKHsvCultJl9Yyp/CyRFVaj4AxoHBQJiIuZFxUvoX8khlJOBXSiDMkRPappkm9/CH0kYLz1YF3+CINCyVpP71mmeWZBq12U5RXT6tSI6Jk7H0uARTz8AJvpdUkpp0yqrpntJT6PMnHtWC2BwNMb6E="
+    - secure: "izc9X8+dk7W+VuFRj2P8QH+f7eHLRs5PlCE6OZB4UvWIpo8IrduEeLeANHpgSYFWuSVNtgKf7GWvzY43iXUAAsXo5dEYmMcDcl/kg30a+sfGs4z2G/dshS1MZyE5qcfRwcya1KtWD4werqU5/2ms+/nfcJEjfC97KU6cKFTasBKI2r3wEzuY5BEiSWUpdrrp+RnziMBEx3oI0r3rVm0JDsvT51m8e99mM252oVs4EMoo2NbAcsNckgCod5liMxG/0ABI3gJzsfhH0tpQICM7BVCjG5hUegECiDlhVHmARPhk4cPm/Owaqq7VxBqLZ0ds6T9UZUq6L5BU0HJG96T3Zj28ZmHumoPXoQ84iX0pMnfFtrvLSqLOJm4AuQTAEWA+LPRCmURzN6QYxgkWqd/Ux6NsOxuv5qteNN/WaA35DKnTFXEDkN+cSedMQh93oNFOGgIedkS+lPJfwl6xb7qLW60Cv9jsKfXodHQ9gD0yj/cxwdc0gUdr3b6MSGPXoXaOUfa3rs8KoF4ls9yVozHnbRfN4dI6rYFs+SnwSeyPSXLVitXTXBiK3uHJ3gbgtin8Pyq75JcDM/ra8w1+6379T6UksSzKNACrzdvwjIkCKKyBHCbJzx66fItNcTcij1+nhvY6nOLqn3HKrF8F1i8jIrpdgUU9w5ScEz1jhO3TYfw="
