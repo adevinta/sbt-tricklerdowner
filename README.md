@@ -1,3 +1,7 @@
+![Maven Central](https://img.shields.io/maven-central/v/com.github.adevinta/sbt-tricklerdowner)
+![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.adevinta/sbt-tricklerdowner?server=https%3A%2F%2Fs01.oss.sonatype.org)
+![Travis (.com)](https://img.shields.io/travis/com/adevinta/sbt-tricklerdowner)
+
 # SBT TricklerDowner plugin
 
 This SBT plugin integrates the build with TricklerDowner managed dependencies by Yaml.
