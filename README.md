@@ -1,6 +1,5 @@
-![Maven Central](https://img.shields.io/maven-central/v/com.github.adevinta/sbt-tricklerdowner)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/com.github.adevinta/sbt-tricklerdowner?server=https%3A%2F%2Fs01.oss.sonatype.org)
-![Travis (.com)](https://img.shields.io/travis/com/adevinta/sbt-tricklerdowner)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.adevinta/sbt-tricklerdowner/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.adevinta/sbt-tricklerdowner)
+[![Travis (.com)](https://img.shields.io/travis/com/adevinta/sbt-tricklerdowner)](https://travis-ci.com/github/adevinta/sbt-tricklerdowner/builds)
 
 # SBT TricklerDowner plugin
 
