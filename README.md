@@ -1,3 +1,6 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.adevinta/sbt-tricklerdowner/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.adevinta/sbt-tricklerdowner)
+[![Travis (.com)](https://img.shields.io/travis/com/adevinta/sbt-tricklerdowner)](https://travis-ci.com/github/adevinta/sbt-tricklerdowner/builds)
+
 # SBT TricklerDowner plugin
 
 This SBT plugin integrates the build with TricklerDowner managed dependencies by Yaml.
